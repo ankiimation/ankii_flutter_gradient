@@ -7,6 +7,7 @@ import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:reorderables/reorderables.dart';
 
 import '../helpers/gradient_helper.dart';
 
@@ -137,19 +138,25 @@ class _MyHomePageState extends State<MyHomePage> {
             _degreesSlider(),
             Container(
               margin: EdgeInsets.all(10),
+              alignment: Alignment.center,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   _stopViewer(),
-                  _colorModiifyingStopSlider(),
+                  _colorModifyingStopSlider(),
                 ],
               ),
             ),
             Container(
               margin: EdgeInsets.all(10),
-              child: Row(
+              child: Wrap(
+                alignment: WrapAlignment.center,
                 children: [
-                  Expanded(flex: 1, child: _colorsList()),
-                  Expanded(flex: 2, child: _colorModifying())
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [_colorsList(), _addColorButton()],
+                  ),
+                  _colorModifying()
                 ],
               ),
             ),
@@ -159,13 +166,100 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _stopViewer() {
-    double width = 300;
+  Widget _addColorButton() {
+    return InkWell(
+      onTap: () {
+        addColor();
+      },
+      child: Container(
+        alignment: Alignment.center,
+        height: 70,
+        width: 70,
+        child: Icon(
+          FontAwesomeIcons.plusCircle,
+          color: itemColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _stopViewer2() {
+    double width = MediaQuery.of(context).size.width;
     var gradient = LinearGradient(
         colors: [...gradientColors.map((e) => e.color).toList()],
         stops: [...gradientColors.map((e) => e.stop).toList()]);
     return Container(
-      margin: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(vertical: 2),
+      height: 50,
+      width: width,
+      decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(50),
+          boxShadow: [BoxShadow(color: itemColor, blurRadius: 5)]),
+      child: Row(
+        children: [
+          ...gradientColors
+              .asMap()
+              .map((index, data) =>
+                  MapEntry(index, __stopViewerIndicator2(index, max: width)))
+              .values
+              .toList()
+        ],
+      ),
+    );
+  }
+
+  Widget __stopViewerIndicator2(int index, {double max}) {
+    return Container(
+      width: max / gradientColors.length,
+      child: SliderTheme(
+        data: SliderTheme.of(context).copyWith(
+          activeTrackColor: Colors.transparent,
+          inactiveTrackColor: Colors.transparent,
+          trackShape: RoundedRectSliderTrackShape(),
+          trackHeight: 7.0,
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+          thumbColor: currentColorIndex == index
+              ? Colors.white
+              : gradientColors[index].color,
+          overlayColor:
+              gradientColors[currentColorIndex].color.withOpacity(0.5),
+          tickMarkShape: RoundSliderTickMarkShape(),
+          activeTickMarkColor: Colors.transparent,
+          inactiveTickMarkColor: Colors.transparent,
+          valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+          valueIndicatorColor: gradientColors[currentColorIndex].color,
+        ),
+        child: Slider(
+          value: gradientColors[index].stop,
+          min: index == 0 ? 0 : (gradientColors[index - 1].stop + 0.01),
+          max: index == gradientColors.length - 1
+              ? 1
+              : (gradientColors[index + 1].stop - 0.01),
+          onChangeStart: (value) {
+            setState(() {
+              if (currentColorIndex != index) currentColorIndex = index;
+            });
+          },
+
+          onChanged: (value) {
+            setState(() {
+              gradientColors[index].stop = value;
+            });
+          },
+          // inactiveColor: PRIMARY_COLOR.withOpacity(0.01),
+          // activeColor: PRIMARY_COLOR,
+        ),
+      ),
+    );
+  }
+
+  Widget _stopViewer() {
+    double width = MediaQuery.of(context).size.width * 0.7;
+    var gradient = LinearGradient(
+        colors: [...gradientColors.map((e) => e.color).toList()],
+        stops: [...gradientColors.map((e) => e.stop).toList()]);
+    return Container(
       padding: EdgeInsets.symmetric(vertical: 2),
       height: 50,
       width: width,
@@ -228,7 +322,7 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         },
         selectionColor: itemColor.withOpacity(0.5),
-        baseColor: itemColor.withOpacity(0.2),
+        baseColor: itemColor.withOpacity(0.01),
         handlerColor: itemColor,
         child: Center(
             child: Text(
@@ -242,64 +336,82 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _colorsList() {
     return Container(
-      child: Wrap(alignment: WrapAlignment.center, children: [
-        ...gradientColors
-            .map((e) => e.color)
-            .toList()
-            .asMap()
-            .map((index, value) => MapEntry(index, __colorListItem(index)))
-            .values
-            .toList(),
-        InkWell(
-          onTap: () {
-            addColor();
+      child: ReorderableWrap(
+          alignment: WrapAlignment.center,
+          onReorder: (int oldIndex, int newIndex) {
+            onReorder(oldIndex, newIndex);
           },
-          child: Container(
-            padding: EdgeInsets.all(5),
-            alignment: Alignment.center,
-            width: 50,
-            height: 50,
-            child: Icon(
-              Icons.add,
-              color: itemColor,
-            ),
-          ),
-        )
-      ]),
+          children: [
+            ...gradientColors
+                .map((e) => e.color)
+                .toList()
+                .asMap()
+                .map((index, value) => MapEntry(index, __colorListItem(index)))
+                .values
+                .toList(),
+          ]),
     );
   }
 
   Widget __colorListItem(int index) {
-    double width = 50;
+    double width = 70;
     double height = width;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          currentColorIndex = index;
-        });
-      },
-      child: Container(
-        width: width,
-        height: height,
-        padding: currentColorIndex == index ? EdgeInsets.all(5) : null,
-        child: Container(
-          child: Card(
-            elevation: currentColorIndex == index ? 0 : 5,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
-                    color: itemColor,
-                    width: currentColorIndex == index ? 5 : 3)),
-            color: gradientColors[index].color,
+    return Container(
+      width: width,
+      height: height,
+      child: Stack(
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                currentColorIndex = index;
+              });
+            },
             child: Container(
-                alignment: Alignment.center,
-                child: Text(
-                  '${index + 1}',
-                  style:
-                      TextStyle(fontWeight: FontWeight.bold, color: itemColor),
-                )),
+              padding: currentColorIndex == index ? EdgeInsets.all(5) : null,
+              child: Container(
+                child: Card(
+                  elevation: currentColorIndex == index ? 0 : 5,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(
+                          color: itemColor,
+                          width: currentColorIndex == index ? 5 : 3)),
+                  color: gradientColors[index].color,
+                  child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: itemColor),
+                      )),
+                ),
+              ),
+            ),
           ),
-        ),
+          gradientColors.length <= 2
+              ? Container()
+              : Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    child: MaterialButton(
+                      onPressed: () {
+                        removeColor(index);
+                      },
+                      shape: CircleBorder(),
+                      color: itemColor,
+                      padding: EdgeInsets.all(0),
+                      child: Icon(
+                        Icons.remove_circle,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                )
+        ],
       ),
     );
   }
@@ -309,82 +421,76 @@ class _MyHomePageState extends State<MyHomePage> {
       currentColorIndex = gradientColors.length - 1;
     }
     return Container(
-      child: Column(
-        children: [
-          SlidePicker(
-            pickerColor: gradientColors[currentColorIndex].color,
-            displayThumbColor: false,
-            showLabel: false,
-            showIndicator: false,
-            sliderTextStyle: TextStyle(color: itemColor),
-            onColorChanged: (newColor) {
-              setState(() {
-                gradientColors[currentColorIndex].color = newColor;
-              });
-            },
-          ),
-        ],
+      child: SlidePicker(
+        pickerColor: gradientColors[currentColorIndex].color,
+        displayThumbColor: false,
+        showLabel: false,
+        showIndicator: false,
+        sliderTextStyle: TextStyle(color: itemColor),
+        onColorChanged: (newColor) {
+          setState(() {
+            gradientColors[currentColorIndex].color = newColor;
+          });
+        },
       ),
     );
   }
 
-  Widget _colorModiifyingStopSlider() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-          flex: 1,
-          child: Text(
+  Widget _colorModifyingStopSlider() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.7,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
             'STOP',
             style: TextStyle(fontWeight: FontWeight.bold, color: itemColor),
           ),
-        ),
-        Expanded(
-          flex: 3,
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: gradientColors[currentColorIndex].color,
-              inactiveTrackColor:
-                  gradientColors[currentColorIndex].color.withOpacity(0.5),
-              trackShape: RoundedRectSliderTrackShape(),
-              trackHeight: 7.0,
-              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
-              thumbColor: Colors.white,
-              overlayColor:
-                  gradientColors[currentColorIndex].color.withOpacity(0.5),
-              tickMarkShape: RoundSliderTickMarkShape(),
-              activeTickMarkColor: gradientColors[currentColorIndex].color,
-              inactiveTickMarkColor: gradientColors[currentColorIndex].color,
-              valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-              valueIndicatorColor: gradientColors[currentColorIndex].color,
-            ),
-            child: Slider(
-              value: gradientColors[currentColorIndex].stop,
-              min: currentColorIndex == 0
-                  ? 0
-                  : gradientColors[currentColorIndex - 1].stop,
-              max: currentColorIndex == gradientColors.length - 1
-                  ? 1
-                  : gradientColors[currentColorIndex + 1].stop,
-              onChanged: (value) {
-                setState(() {
-                  gradientColors[currentColorIndex].stop = value;
-                });
-              },
-              // inactiveColor: PRIMARY_COLOR.withOpacity(0.2),
-              // activeColor: PRIMARY_COLOR,
+          Expanded(
+            flex: 3,
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: gradientColors[currentColorIndex].color,
+                inactiveTrackColor:
+                    gradientColors[currentColorIndex].color.withOpacity(0.5),
+                trackShape: RoundedRectSliderTrackShape(),
+                trackHeight: 7.0,
+                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+                thumbColor: Colors.white,
+                overlayColor:
+                    gradientColors[currentColorIndex].color.withOpacity(0.5),
+                tickMarkShape: RoundSliderTickMarkShape(),
+                activeTickMarkColor: gradientColors[currentColorIndex].color,
+                inactiveTickMarkColor: gradientColors[currentColorIndex].color,
+                valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+                valueIndicatorColor: gradientColors[currentColorIndex].color,
+              ),
+              child: Slider(
+                value: gradientColors[currentColorIndex].stop,
+
+                min: currentColorIndex == 0
+                    ? 0
+                    : (gradientColors[currentColorIndex - 1].stop + 0.01),
+                max: currentColorIndex == gradientColors.length - 1
+                    ? 1
+                    : (gradientColors[currentColorIndex + 1].stop - 0.01),
+                onChanged: (value) {
+                  setState(() {
+                    gradientColors[currentColorIndex].stop = value;
+                  });
+                },
+                // inactiveColor: PRIMARY_COLOR.withOpacity(0.01),
+                // activeColor: PRIMARY_COLOR,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Text(
+          Text(
             '${(gradientColors[currentColorIndex].stop * 100).toStringAsFixed(2)}%',
             textAlign: TextAlign.end,
             style: TextStyle(fontWeight: FontWeight.bold, color: itemColor),
-          ),
-        )
-      ],
+          )
+        ],
+      ),
     );
   }
 
@@ -395,14 +501,25 @@ class _MyHomePageState extends State<MyHomePage> {
         Wrap(
           alignment: WrapAlignment.center,
           children: [
-            _stopViewer(),
-            _colorModiifyingStopSlider(),
             Container(
               margin: EdgeInsets.all(10),
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(flex: 1, child: _colorsList()),
-                  Expanded(flex: 2, child: _colorModifying())
+                  _stopViewer(),
+                  _colorModifyingStopSlider(),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                children: [
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [_colorsList(), _addColorButton()],
+                  ),
+                  _colorModifying()
                 ],
               ),
             ),
@@ -467,7 +584,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: ListView(
                               children: [
                                 SizedBox(
-                                  height: MediaQuery.of(context).padding.top,
+                                  height:
+                                      MediaQuery.of(context).padding.top + 30,
                                 ),
                                 // Container(
                                 //     margin: EdgeInsets.all(10),
@@ -649,6 +767,17 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  onReorder(int oldIndex, int newIndex) {
+    print('$oldIndex - $newIndex');
+    var oldTempColor = gradientColors[oldIndex].color;
+    var newTempColor = gradientColors[newIndex].color;
+    gradientColors[oldIndex].color = newTempColor;
+    gradientColors[newIndex].color = oldTempColor;
+    setState(() {
+      currentColorIndex = newIndex;
+    });
+  }
+
   List<double> _impliedStops(int length) {
     final double separation = 1.0 / (length - 1);
     return List<double>.generate(
@@ -656,6 +785,18 @@ class _MyHomePageState extends State<MyHomePage> {
       (int index) => index * separation,
       growable: false,
     );
+  }
+
+  double genWidth(int index, {double maxWidth}) {
+    double toSubtract = 0;
+    for (int i = 0; i < index; i++) {
+      toSubtract += gradientColors[i].stop * maxWidth;
+    }
+    for (int i = index + 1; i < gradientColors.length; i++) {
+      toSubtract += gradientColors[i].stop * maxWidth;
+    }
+    print(toSubtract);
+    return maxWidth - toSubtract;
   }
 
   Color _generateRandomColor() {
