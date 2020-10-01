@@ -620,50 +620,56 @@ class _MyHomePageState extends State<MyHomePage> {
         // ),
         body: Stack(
           children: [
-            AnimatedContainer(
-              duration: Duration(milliseconds: 500),
-              height: double.maxFinite,
-              width: double.maxFinite,
-              decoration: BoxDecoration(gradient: gradient),
-              child: AnimatedSwitcher(
+            Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage("assets/transparent.jpg"),
+                      fit: BoxFit.fill)),
+              child: AnimatedContainer(
                 duration: Duration(milliseconds: 500),
-                child: viewFull
-                    ? SizedBox()
-                    : Column(
-                        children: [
-                          Expanded(
-                              child: NoGrowScrollView(
-                            child: ListView(
-                              children: [
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).padding.top + 20,
-                                ),
-                                Text(
-                                  '#GRADiiENT',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.5,
-                                      color: itemColor),
-                                ),
-                                SizedBox(
-                                  height: 30,
-                                ),
-                                typeSwitcher(),
-                                SizedBox(
-                                  height: 30,
-                                ),
-                                _type == 0 ? linearOption() : radialOption(),
-                                SizedBox(
-                                  height: 20,
-                                )
-                              ],
-                            ),
-                          ))
-                        ],
-                      ),
+                height: double.maxFinite,
+                width: double.maxFinite,
+                decoration: BoxDecoration(gradient: gradient),
+                child: AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  child: viewFull
+                      ? SizedBox()
+                      : Column(
+                          children: [
+                            Expanded(
+                                child: NoGrowScrollView(
+                              child: ListView(
+                                children: [
+                                  SizedBox(
+                                    height:
+                                        MediaQuery.of(context).padding.top + 20,
+                                  ),
+                                  Text(
+                                    '#GRADiiENT',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.5,
+                                        color: itemColor),
+                                  ),
+                                  SizedBox(
+                                    height: 30,
+                                  ),
+                                  typeSwitcher(),
+                                  SizedBox(
+                                    height: 30,
+                                  ),
+                                  _type == 0 ? linearOption() : radialOption(),
+                                  SizedBox(
+                                    height: 20,
+                                  )
+                                ],
+                              ),
+                            ))
+                          ],
+                        ),
+                ),
               ),
             ),
             Align(
