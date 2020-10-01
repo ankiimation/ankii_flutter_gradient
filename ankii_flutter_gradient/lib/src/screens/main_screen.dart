@@ -43,8 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // SUB WIDGETS
   Widget gradientCard() {
     double width = MediaQuery.of(context).size.width;
-    double height = width;
-
+    double height = 150;
+    double padding = 10;
     Gradient gradient = _type == 0
         ? LinearGradient(
             colors: [...gradientColors.map((e) => e.color).toList()],
@@ -67,6 +67,55 @@ class _MyHomePageState extends State<MyHomePage> {
             borderRadius: BorderRadius.circular(10),
             gradient: viewFull ? null : gradient),
         alignment: Alignment.center,
+        padding: EdgeInsets.all(padding),
+        child: Row(
+          children: [
+            Expanded(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                    gradient: gradient,
+                    border: Border.all(color: itemColor, width: 2)),
+                child: Center(
+                    child: Text(
+                  'Scale x2',
+                  style: TextStyle(color: itemColor),
+                )),
+              ),
+            ),
+            SizedBox(
+              width: padding,
+            ),
+            Expanded(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                    gradient: gradient.scale(0.5),
+                    border: Border.all(color: itemColor, width: 2)),
+                child: Center(
+                    child: Text(
+                  'Scale x2',
+                  style: TextStyle(color: itemColor),
+                )),
+              ),
+            ),
+            SizedBox(
+              width: padding,
+            ),
+            Expanded(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                    border: Border.all(color: itemColor, width: 2)),
+                child: Center(
+                    child: Text(
+                  'Transparent',
+                  style: TextStyle(color: itemColor),
+                )),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -77,28 +126,26 @@ class _MyHomePageState extends State<MyHomePage> {
             colors: [...gradientColors.map((e) => e.color).toList()])
         : RadialGradient(
             colors: [...gradientColors.map((e) => e.color).toList()]);
-    return MaterialButton(
-      onPressed: () {
+    return GestureDetector(
+      onTap: () {
         setState(() {
           if (_type != index) {
             _type = index;
           }
         });
       },
-      elevation: _type == index ? 0 : 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      color: Colors.white,
-      padding: EdgeInsets.all(0),
       child: Container(
           width: 100,
           decoration: BoxDecoration(
-              gradient: _type == index ? gradient : null,
+              border: Border.all(color: itemColor, width: 2),
+              color: _type != index ? Colors.transparent : itemColor,
               borderRadius: BorderRadius.circular(5)),
           alignment: Alignment.center,
           padding: EdgeInsets.all(10),
           child: Text(
             text,
-            style: TextStyle(color: _type == index ? itemColor : null),
+            style: TextStyle(
+                color: _type != index ? itemColor : gradientColors[0].color),
           )),
     );
   }
@@ -281,13 +328,15 @@ class _MyHomePageState extends State<MyHomePage> {
         colors: [...gradientColors.map((e) => e.color).toList()],
         stops: [...gradientColors.map((e) => e.stop).toList()]);
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 2),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
       height: 50,
       width: width,
       decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(50),
-          boxShadow: [BoxShadow(color: itemColor, blurRadius: 5)]),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: itemColor, width: 2)
+          // boxShadow: [BoxShadow(color: itemColor, blurRadius: 5)]
+          ),
       child: Stack(
         children: [
           ...gradientColors
@@ -304,6 +353,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget __stopViewerIndicator(int index,
       {double max = 1, double percent = 1}) {
     double width = 20;
+    double padding = 10;
     return GestureDetector(
       onTapDown: (d) {
         setState(() {
@@ -332,15 +382,16 @@ class _MyHomePageState extends State<MyHomePage> {
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         margin: EdgeInsets.only(
-            left:
-                max * percent > width ? max * percent - width : max * percent),
+            left: max * percent > width + padding
+                ? max * percent - width - padding
+                : max * percent),
         height: 50,
         width: width,
         decoration: BoxDecoration(
             color: gradientColors[index].color,
             borderRadius: BorderRadius.circular(50),
             border: Border.all(
-                color: itemColor, width: currentColorIndex == index ? 5 : 2)),
+                color: itemColor, width: currentColorIndex == index ? 4 : 2)),
       ),
     );
   }
@@ -408,15 +459,15 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             },
             child: Container(
-              padding: currentColorIndex == index ? EdgeInsets.all(5) : null,
+              padding: currentColorIndex != index ? EdgeInsets.all(5) : null,
               child: Container(
                 child: Card(
-                  elevation: currentColorIndex == index ? 0 : 2,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(
                           color: itemColor,
-                          width: currentColorIndex == index ? 5 : 3)),
+                          width: currentColorIndex == index ? 4 : 2)),
                   color: gradientColors[index].color,
                   child: Container(
                       alignment: Alignment.center,
@@ -621,15 +672,16 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Stack(
           children: [
             Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage("assets/transparent.jpg"),
-                      fit: BoxFit.fill)),
+              // decoration: BoxDecoration(
+              //     image: DecorationImage(
+              //         image: AssetImage("assets/transparent.jpg"),
+              //         fit: BoxFit.fill)),
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 500),
                 height: double.maxFinite,
                 width: double.maxFinite,
-                decoration: BoxDecoration(gradient: gradient),
+                decoration: BoxDecoration(
+                    color: gradientColors[0].color, gradient: gradient),
                 child: AnimatedSwitcher(
                   duration: Duration(milliseconds: 500),
                   child: viewFull
@@ -660,6 +712,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                   SizedBox(
                                     height: 30,
                                   ),
+                                  // gradientCard(),
+                                  // SizedBox(
+                                  //   height: 30,
+                                  // ),
                                   _type == 0 ? linearOption() : radialOption(),
                                   SizedBox(
                                     height: 20,
@@ -807,7 +863,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 border: Border.all(color: itemColor, width: 2)),
                             child: Icon(
                               viewFull
-                                  ? FontAwesomeIcons.eyeSlash
+                                  ? FontAwesomeIcons.slidersH
                                   : FontAwesomeIcons.eye,
                               color: itemColor,
                             ),
