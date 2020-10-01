@@ -34,6 +34,11 @@ dependencies:
   font_awesome_flutter: ^8.8.1
   flutter_spinkit: ^4.1.2+1
   reorderables: ^0.3.2
+  flutter_html: ^1.0.2
+  share: ^0.6.5+2
+  path_provider: ^1.6.18
+  wallpaper_manager: ^1.0.10
+  permission_handler: ^5.0.1+1
 
 dev_dependencies:
   flutter_test:

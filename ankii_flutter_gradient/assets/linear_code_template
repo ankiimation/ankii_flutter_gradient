@@ -1,0 +1,7 @@
+<h2>LinearGradient</h2>
+<p>(</p>
+<p><em>colors</em>: <strong>$colors</strong>,</p>
+<p><em>stops</em>: <strong>$stops</strong>,</p>
+<p><em>begin</em>: Alignment(<strong>$beginX</strong>, <strong>$beginY</strong>),</p>
+<p><em>end</em>: Alignment(<strong>$endX</strong>, <strong>$endY</strong>)</p>
+<p>)</p>
