@@ -1,14 +1,16 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
+
 import 'package:ankii_flutter_gradient/src/helpers/string_helper.dart';
 import 'package:ankii_flutter_gradient/src/services/wallpaper_service.dart';
+import 'package:ankii_flutter_gradient/src/widgets/circular_slider.dart';
+import 'package:ankii_flutter_gradient/src/widgets/increase_slider.dart';
 import 'package:ankii_flutter_gradient/src/widgets/no_glowable_scroll_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_circular_slider/flutter_circular_slider.dart';
+
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
@@ -32,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
     AnKiiGradientColor(color: Colors.red, stop: 0),
     AnKiiGradientColor(color: Colors.blue, stop: 1)
   ];
-  int degreeValue = 0;
+  double degreeValue = 180;
   Alignment begin = Alignment.topCenter;
   Alignment end = Alignment.bottomCenter;
   bool viewFull = false;
@@ -50,7 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
             colors: [...gradientColors.map((e) => e.color).toList()],
             stops: [...gradientColors.map((e) => e.stop).toList()],
             begin: begin,
-            end: end)
+            end: end,
+          )
         : RadialGradient(
             colors: [...gradientColors.map((e) => e.color).toList()],
             stops: [...gradientColors.map((e) => e.stop).toList()]);
@@ -64,8 +67,9 @@ class _MyHomePageState extends State<MyHomePage> {
         height: height,
         width: width,
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: viewFull ? null : gradient),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
         alignment: Alignment.center,
         padding: EdgeInsets.all(padding),
         child: Row(
@@ -74,11 +78,21 @@ class _MyHomePageState extends State<MyHomePage> {
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                    gradient: gradient,
+                    gradient: SweepGradient(
+                      center: FractionalOffset.center,
+                      startAngle: 0,
+                      endAngle: degreeValue * 2 * pi / 360,
+                      colors: <Color>[
+                        ...gradientColors.map((e) => e.color).toList()
+                      ],
+                      stops: <double>[
+                        ...gradientColors.map((e) => e.stop).toList()
+                      ],
+                    ),
                     border: Border.all(color: itemColor, width: 2)),
                 child: Center(
                     child: Text(
-                  'Scale x2',
+                  'Swipe',
                   style: TextStyle(color: itemColor),
                 )),
               ),
@@ -160,6 +174,10 @@ class _MyHomePageState extends State<MyHomePage> {
             width: 10,
           ),
           _typeSwitcherButton(text: 'Radial', index: 1),
+          SizedBox(
+            width: 10,
+          ),
+          _typeSwitcherButton(text: 'Swipe', index: 2),
         ],
       ),
     );
@@ -251,77 +269,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _stopViewer2() {
-    double width = MediaQuery.of(context).size.width;
-    var gradient = LinearGradient(
-        colors: [...gradientColors.map((e) => e.color).toList()],
-        stops: [...gradientColors.map((e) => e.stop).toList()]);
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 2),
-      height: 50,
-      width: width,
-      decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(50),
-          boxShadow: [BoxShadow(color: itemColor, blurRadius: 5)]),
-      child: Row(
-        children: [
-          ...gradientColors
-              .asMap()
-              .map((index, data) =>
-                  MapEntry(index, __stopViewerIndicator2(index, max: width)))
-              .values
-              .toList()
-        ],
-      ),
-    );
-  }
-
-  Widget __stopViewerIndicator2(int index, {double max}) {
-    return Container(
-      width: max / gradientColors.length,
-      child: SliderTheme(
-        data: SliderTheme.of(context).copyWith(
-          activeTrackColor: Colors.transparent,
-          inactiveTrackColor: Colors.transparent,
-          trackShape: RoundedRectSliderTrackShape(),
-          trackHeight: 7.0,
-          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
-          thumbColor: currentColorIndex == index
-              ? Colors.white
-              : gradientColors[index].color,
-          overlayColor:
-              gradientColors[currentColorIndex].color.withOpacity(0.5),
-          tickMarkShape: RoundSliderTickMarkShape(),
-          activeTickMarkColor: Colors.transparent,
-          inactiveTickMarkColor: Colors.transparent,
-          valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-          valueIndicatorColor: gradientColors[currentColorIndex].color,
-        ),
-        child: Slider(
-          value: gradientColors[index].stop,
-          min: index == 0 ? 0 : (gradientColors[index - 1].stop + 0.01),
-          max: index == gradientColors.length - 1
-              ? 1
-              : (gradientColors[index + 1].stop - 0.01),
-          onChangeStart: (value) {
-            setState(() {
-              if (currentColorIndex != index) currentColorIndex = index;
-            });
-          },
-
-          onChanged: (value) {
-            setState(() {
-              gradientColors[index].stop = value;
-            });
-          },
-          // inactiveColor: PRIMARY_COLOR.withOpacity(0.01),
-          // activeColor: PRIMARY_COLOR,
-        ),
-      ),
-    );
-  }
-
   Widget _stopViewer() {
     double width = MediaQuery.of(context).size.width * 0.7;
     var gradient = LinearGradient(
@@ -398,31 +345,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _degreesSlider() {
     return Container(
-      width: 200,
-      height: 200,
-      child: SingleCircularSlider(
-        180,
-        degreeValue ~/ 2,
-        onSelectionChange: (a, b, c) {
-          degreeValue = b * 2;
-          var alignments =
-              GradientHelper.calcGradientAlignment(degreeValue.toDouble());
-          setState(() {
-            begin = alignments.begin;
-            end = alignments.end;
-          });
-        },
-        selectionColor: itemColor.withOpacity(0.5),
-        baseColor: itemColor.withOpacity(0.01),
-        handlerColor: itemColor,
-        child: Center(
-            child: Text(
-          '${degreeValue}°',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 20, color: itemColor),
-        )),
-      ),
-    );
+        width: 200,
+        height: 200,
+        child: SingleCircularSlider(
+          360,
+          degreeValue.toInt(),
+          onSelectionChange: (a, b, c) {
+            if (b == 0)
+              degreeValue = 1;
+            else
+              degreeValue = b.toDouble();
+            var alignmentTemp =
+                GradientHelper.calcGradientAlignment(degreeValue);
+            setState(() {
+              begin = alignmentTemp.begin;
+              end = alignmentTemp.end;
+            });
+          },
+          child: Center(
+              child: Text(
+            '${degreeValue.floor()}°',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: itemColor),
+          )),
+        ));
   }
 
   Widget _colorsList() {
@@ -630,6 +576,72 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget sweepOption() {
+    return Container(
+      padding: EdgeInsets.only(bottom: 100),
+      child: _linerOptionCard(
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _sweepEndSlider(),
+            SizedBox(
+              height: 30,
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _stopViewer(),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  _colorModifyingStopSlider(),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [_colorsList(), _addColorButton()],
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  _colorModifying()
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double sweepEndValue = pi / 180;
+
+  Widget _sweepEndSlider() {
+    return Container(
+        child: IncreaseSlider(
+      min: 1 * 2 * pi / 360,
+      max: double.maxFinite,
+      interval: pi / 180,
+      onUpdate: (value) {
+        if (value > pi / 180)
+          setState(() {
+            sweepEndValue = value;
+          });
+      },
+    ));
+  }
+
   //MAIN WIDGET
   @override
   void initState() {
@@ -648,9 +660,19 @@ class _MyHomePageState extends State<MyHomePage> {
             stops: [...gradientColors.map((e) => e.stop).toList()],
             begin: begin,
             end: end)
-        : RadialGradient(
-            colors: [...gradientColors.map((e) => e.color).toList()],
-            stops: [...gradientColors.map((e) => e.stop).toList()]);
+        : _type == 1
+            ? RadialGradient(
+                colors: [...gradientColors.map((e) => e.color).toList()],
+                stops: [...gradientColors.map((e) => e.stop).toList()])
+            : SweepGradient(
+                colors: [...gradientColors.map((e) => e.color).toList()],
+                stops: [
+                  ...gradientColors.map((e) => e.stop).toList(),
+                ],
+                center: FractionalOffset(0.5, 0.5),
+                startAngle: 0,
+                endAngle: sweepEndValue,
+              );
     return Scaffold(
         backgroundColor: gradientColors[0].color,
         // floatingActionButton: FloatingActionButton(
@@ -682,51 +704,52 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: double.maxFinite,
                 decoration: BoxDecoration(
                     color: gradientColors[0].color, gradient: gradient),
-                child: AnimatedSwitcher(
-                  duration: Duration(milliseconds: 500),
-                  child: viewFull
-                      ? SizedBox()
-                      : Column(
-                          children: [
-                            Expanded(
-                                child: NoGrowScrollView(
-                              child: ListView(
-                                children: [
-                                  SizedBox(
-                                    height:
-                                        MediaQuery.of(context).padding.top + 20,
-                                  ),
-                                  Text(
-                                    '#GRADiiENT',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.5,
-                                        color: itemColor),
-                                  ),
-                                  SizedBox(
-                                    height: 30,
-                                  ),
-                                  typeSwitcher(),
-                                  SizedBox(
-                                    height: 30,
-                                  ),
-                                  // gradientCard(),
-                                  // SizedBox(
-                                  //   height: 30,
-                                  // ),
-                                  _type == 0 ? linearOption() : radialOption(),
-                                  SizedBox(
-                                    height: 20,
-                                  )
-                                ],
-                              ),
-                            ))
-                          ],
-                        ),
-                ),
               ),
+            ),
+            AnimatedSwitcher(
+              duration: Duration(milliseconds: 500),
+              child: viewFull
+                  ? SizedBox()
+                  : Column(
+                      children: [
+                        Expanded(
+                            child: NoGrowScrollView(
+                          child: ListView(
+                            children: [
+                              SizedBox(
+                                height: MediaQuery.of(context).padding.top + 20,
+                              ),
+                              Text(
+                                '#GRADiiENT',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5,
+                                    color: itemColor),
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
+                              typeSwitcher(),
+                              SizedBox(
+                                height: 30,
+                              ),
+                              // gradientCard(),
+                              SizedBox(
+                                height: 30,
+                              ),
+                              _type == 0
+                                  ? linearOption()
+                                  : _type == 1 ? radialOption() : sweepOption(),
+                              SizedBox(
+                                height: 20,
+                              )
+                            ],
+                          ),
+                        ))
+                      ],
+                    ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -886,6 +909,10 @@ class _MyHomePageState extends State<MyHomePage> {
   void random() {
     if (!_randomLoading) {
       int length = Random().nextInt(5 - 2 + 1) + 2;
+      sweepEndValue =
+          (Random().nextInt((360 * 2 * pi / 360 - pi / 180 + 1).floor()) +
+                  pi / 180)
+              .toDouble();
       List<Color> colors =
           List<Color>.generate(length, (index) => _generateRandomColor());
       List<double> stops = _impliedStops(length);
@@ -894,7 +921,7 @@ class _MyHomePageState extends State<MyHomePage> {
         gradientColors
             .add(AnKiiGradientColor(stop: stops[i], color: colors[i]));
       }
-      degreeValue = Random().nextInt(360);
+      degreeValue = Random().nextInt(360).toDouble();
       var alignment =
           GradientHelper.calcGradientAlignment(degreeValue.toDouble());
       setState(() {
