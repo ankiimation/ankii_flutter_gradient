@@ -11,7 +11,7 @@ class NoGrowScrollView extends StatelessWidget {
       child: NotificationListener<OverscrollIndicatorNotification>(
           onNotification: (OverscrollIndicatorNotification ovs) {
             ovs.disallowGlow();
-            return;
+            return true;
           },
           child: child),
     );

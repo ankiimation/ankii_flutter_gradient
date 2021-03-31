@@ -166,6 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget typeSwitcher() {
     return Container(
+      padding: EdgeInsets.all(10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -207,16 +208,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Container(
       padding: EdgeInsets.only(bottom: 100),
       child: _linerOptionCard(
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
           children: [
             _degreesSlider(),
-            SizedBox(
-              height: 30,
-            ),
             Container(
               margin: EdgeInsets.all(10),
-              alignment: Alignment.center,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -228,15 +225,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
-            SizedBox(
-              height: 30,
-            ),
+
             Container(
               margin: EdgeInsets.all(10),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Wrap(
-                    alignment: WrapAlignment.center,
                     children: [_colorsList(), _addColorButton()],
                   ),
                   SizedBox(
@@ -535,8 +530,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Container(
       padding: EdgeInsets.only(bottom: 100),
       child: _linerOptionCard(
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
           children: [
             Container(
               margin: EdgeInsets.all(10),
@@ -710,46 +705,41 @@ class _MyHomePageState extends State<MyHomePage> {
               duration: Duration(milliseconds: 500),
               child: viewFull
                   ? SizedBox()
-                  : Column(
-                      children: [
-                        Expanded(
-                            child: NoGrowScrollView(
-                          child: ListView(
-                            children: [
-                              SizedBox(
-                                height: MediaQuery.of(context).padding.top + 20,
-                              ),
-                              Text(
-                                '#GRADiiENT',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
-                                    color: itemColor),
-                              ),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              typeSwitcher(),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              // gradientCard(),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              _type == 0
-                                  ? linearOption()
-                                  : _type == 1 ? radialOption() : sweepOption(),
-                              SizedBox(
-                                height: 20,
-                              )
-                            ],
-                          ),
-                        ))
-                      ],
+                  : NoGrowScrollView(
+                    child: SingleChildScrollView(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [
+                      SizedBox(
+                        height:
+                            MediaQuery.of(context).padding.top + 20,
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '#GRADiiENT',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                              color: itemColor),
+                        ),
+                      ),
+                      typeSwitcher(),
+                      _type == 0
+                          ? linearOption()
+                          : _type == 1
+                              ? radialOption()
+                              : sweepOption(),
+                      SizedBox(
+                        height: 20,
+                      )
+                    ],
+                  ),
                     ),
+                  ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -988,126 +978,128 @@ class _MyHomePageState extends State<MyHomePage> {
     int codeTypeIndex = 0;
     showDialog(
         context: context,
-        child: AlertDialog(
-          content: StatefulBuilder(builder: (context, stateSetter) {
-            var html = genCode(
-                gradientType:
-                    _type == 0 ? GradientType.linear : GradientType.radial,
-                codeType: codeTypeIndex == 0
-                    ? CodeGenType.flutter
-                    : codeTypeIndex == 1
-                        ? CodeGenType.css
-                        : codeTypeIndex == 2
-                            ? CodeGenType.android
-                            : codeTypeIndex == 3
-                                ? CodeGenType.ios
-                                : CodeGenType.reactNative);
-            var result = html.withOutHtmlTag();
-            return Container(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    NoGrowScrollView(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            __viewCodeButton(
-                                onPressed: () {
-                                  stateSetter(() {
-                                    codeTypeIndex = 0;
-                                  });
-                                },
-                                selected: codeTypeIndex == 0,
-                                text: 'Flutter'),
-                            __viewCodeButton(
-                                onPressed: () {
-                                  stateSetter(() {
-                                    codeTypeIndex = 1;
-                                  });
-                                },
-                                selected: codeTypeIndex == 1,
-                                text: 'CSS'),
-                            __viewCodeButton(
-                                onPressed: () {
-                                  stateSetter(() {
-                                    codeTypeIndex = 2;
-                                  });
-                                },
-                                selected: codeTypeIndex == 2,
-                                text: 'Android'),
-                            __viewCodeButton(
-                                onPressed: () {
-                                  stateSetter(() {
-                                    codeTypeIndex = 3;
-                                  });
-                                },
-                                selected: codeTypeIndex == 3,
-                                text: 'iOS'),
-                            __viewCodeButton(
-                                onPressed: () {
-                                  stateSetter(() {
-                                    codeTypeIndex = 4;
-                                  });
-                                },
-                                selected: codeTypeIndex == 4,
-                                text: 'React Native')
-                          ],
+        builder: (_) => AlertDialog(
+              content: StatefulBuilder(builder: (context, stateSetter) {
+                var html = genCode(
+                    gradientType:
+                        _type == 0 ? GradientType.linear : GradientType.radial,
+                    codeType: codeTypeIndex == 0
+                        ? CodeGenType.flutter
+                        : codeTypeIndex == 1
+                            ? CodeGenType.css
+                            : codeTypeIndex == 2
+                                ? CodeGenType.android
+                                : codeTypeIndex == 3
+                                    ? CodeGenType.ios
+                                    : CodeGenType.reactNative);
+                var result = html.withOutHtmlTag();
+                return Container(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        NoGrowScrollView(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                __viewCodeButton(
+                                    onPressed: () {
+                                      stateSetter(() {
+                                        codeTypeIndex = 0;
+                                      });
+                                    },
+                                    selected: codeTypeIndex == 0,
+                                    text: 'Flutter'),
+                                __viewCodeButton(
+                                    onPressed: () {
+                                      stateSetter(() {
+                                        codeTypeIndex = 1;
+                                      });
+                                    },
+                                    selected: codeTypeIndex == 1,
+                                    text: 'CSS'),
+                                __viewCodeButton(
+                                    onPressed: () {
+                                      stateSetter(() {
+                                        codeTypeIndex = 2;
+                                      });
+                                    },
+                                    selected: codeTypeIndex == 2,
+                                    text: 'Android'),
+                                __viewCodeButton(
+                                    onPressed: () {
+                                      stateSetter(() {
+                                        codeTypeIndex = 3;
+                                      });
+                                    },
+                                    selected: codeTypeIndex == 3,
+                                    text: 'iOS'),
+                                __viewCodeButton(
+                                    onPressed: () {
+                                      stateSetter(() {
+                                        codeTypeIndex = 4;
+                                      });
+                                    },
+                                    selected: codeTypeIndex == 4,
+                                    text: 'React Native')
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    Html(
-                      data: html,
-                      style: {
-                        "h2": Style(color: Colors.cyan),
-                        "em": Style(color: Colors.lightBlue)
-                      },
-                    ),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          copied
-                              ? Column(
-                                  children: [
-                                    Icon(
-                                      FontAwesomeIcons.check,
-                                      color: Colors.green,
-                                      size: 20,
-                                    ),
-                                    Text(
-                                      'Copied!',
-                                      style: TextStyle(color: Colors.green),
+                        Html(
+                          data: html,
+                          style: {
+                            "h2": Style(color: Colors.cyan),
+                            "em": Style(color: Colors.lightBlue)
+                          },
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              copied
+                                  ? Column(
+                                      children: [
+                                        Icon(
+                                          FontAwesomeIcons.check,
+                                          color: Colors.green,
+                                          size: 20,
+                                        ),
+                                        Text(
+                                          'Copied!',
+                                          style: TextStyle(color: Colors.green),
+                                        )
+                                      ],
                                     )
-                                  ],
-                                )
-                              : IconButton(
-                                  icon: Icon(FontAwesomeIcons.copy),
-                                  onPressed: () async {
-                                    await Clipboard.setData(
-                                        ClipboardData(text: result));
-                                    stateSetter(() {
-                                      copied = true;
-                                    });
+                                  : IconButton(
+                                      icon: Icon(FontAwesomeIcons.copy),
+                                      onPressed: () async {
+                                        await Clipboard.setData(
+                                            ClipboardData(text: result));
+                                        stateSetter(() {
+                                          copied = true;
+                                        });
+                                      }),
+                              IconButton(
+                                  icon: Icon(FontAwesomeIcons.shareAlt),
+                                  onPressed: () {
+                                    Share.share(result);
                                   }),
-                          IconButton(
-                              icon: Icon(FontAwesomeIcons.shareAlt),
-                              onPressed: () {
-                                Share.share(result);
-                              }),
-                        ])
-                  ],
-                ),
-              ),
-            );
-          }),
-        ));
+                            ])
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ));
   }
 
   Widget __viewCodeButton(
-      {Function onPressed, bool selected = false, String text}) {
+      {Function onPressed, bool selected = false, @required String text}) {
     return FlatButton(
-      onPressed: onPressed,
+      onPressed: () {
+        onPressed?.call();
+      },
       child: Text(
         '$text',
         style: TextStyle(
@@ -1123,191 +1115,191 @@ class _MyHomePageState extends State<MyHomePage> {
   bool saveImage = true;
 
   showSetWallpaperDialog() async {
-    bool settingWallpaper = false;
-    bool isSuccessfully;
-    setState(() {
-      settingWallpaperDialogShowing = true;
-    });
-    await showDialog(
-        context: context,
-        barrierDismissible: false,
-        child: AlertDialog(
-          title: Text('Set Wallpaper'),
-          content: StatefulBuilder(builder: (context, stateSetter) {
-            return Container(
-              child: isSuccessfully != null
-                  ? Icon(
-                      FontAwesomeIcons.check,
-                      color: Colors.green,
-                      size: 50,
-                    )
-                  : settingWallpaper
-                      ? Container(
-                          width: 100,
-                          height: 100,
-                          child:
-                              SpinKitDualRing(color: gradientColors[0].color))
-                      : SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Checkbox(
-                                      value: saveImage,
-                                      activeColor: gradientColors[0].color,
-                                      onChanged: (value) {
-                                        stateSetter(() {
-                                          saveImage = value;
-                                        });
-                                      }),
-                                  Expanded(
-                                      child: Text(
-                                          'Save image${saveImage ? '\n(0/GRADiiENT/Wallpapers/)' : ''}'))
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Checkbox(
-                                      value: setHomeWallpaper,
-                                      activeColor: gradientColors[0].color,
-                                      onChanged: (value) {
-                                        stateSetter(() {
-                                          setHomeWallpaper = value;
-                                        });
-                                      }),
-                                  Expanded(
-                                      child:
-                                          Text('Set as Home Screen Wallpaper'))
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Checkbox(
-                                      value: setLockWallpaper,
-                                      activeColor: gradientColors[0].color,
-                                      onChanged: (value) {
-                                        stateSetter(() {
-                                          setLockWallpaper = value;
-                                        });
-                                      }),
-                                  Expanded(
-                                      child:
-                                          Text('Set as Lock Screen Wallpaper'))
-                                ],
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  !setHomeWallpaper && !setLockWallpaper
-                                      ? Container()
-                                      : FlatButton(
-                                          child: Text(
-                                            'Set',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: gradientColors[0].color,
-                                                fontSize: 20),
-                                          ),
-                                          onPressed: () async {
-                                            stateSetter(() {
-                                              settingWallpaper = true;
-                                            });
-                                            await _setWallpaper(
-                                                homeScreen: setHomeWallpaper,
-                                                lockScreen: setLockWallpaper,
-                                                save: saveImage);
-                                            stateSetter(() {
-                                              isSuccessfully = true;
-                                            });
-                                            Future.delayed(Duration(seconds: 2),
-                                                () {
-                                              stateSetter(() {
-                                                Navigator.pop(context);
-                                              });
-                                            });
-                                          },
-                                        ),
-                                  FlatButton(
-                                    child: Text('Close'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-            );
-          }),
-        ));
-    setState(() {
-      settingWallpaperDialogShowing = false;
-    });
+    // bool settingWallpaper = false;
+    // bool isSuccessfully;
+    // setState(() {
+    //   settingWallpaperDialogShowing = true;
+    // });
+    // await showDialog(
+    //     context: context,
+    //     barrierDismissible: false,
+    //     builder:(_)=> AlertDialog(
+    //       title: Text('Set Wallpaper'),
+    //       content: StatefulBuilder(builder: (context, stateSetter) {
+    //         return Container(
+    //           child: isSuccessfully != null
+    //               ? Icon(
+    //                   FontAwesomeIcons.check,
+    //                   color: Colors.green,
+    //                   size: 50,
+    //                 )
+    //               : settingWallpaper
+    //                   ? Container(
+    //                       width: 100,
+    //                       height: 100,
+    //                       child:
+    //                           SpinKitDualRing(color: gradientColors[0].color))
+    //                   : SingleChildScrollView(
+    //                       child: Column(
+    //                         children: [
+    //                           Row(
+    //                             children: [
+    //                               Checkbox(
+    //                                   value: saveImage,
+    //                                   activeColor: gradientColors[0].color,
+    //                                   onChanged: (value) {
+    //                                     stateSetter(() {
+    //                                       saveImage = value;
+    //                                     });
+    //                                   }),
+    //                               Expanded(
+    //                                   child: Text(
+    //                                       'Save image${saveImage ? '\n(0/GRADiiENT/Wallpapers/)' : ''}'))
+    //                             ],
+    //                           ),
+    //                           Row(
+    //                             children: [
+    //                               Checkbox(
+    //                                   value: setHomeWallpaper,
+    //                                   activeColor: gradientColors[0].color,
+    //                                   onChanged: (value) {
+    //                                     stateSetter(() {
+    //                                       setHomeWallpaper = value;
+    //                                     });
+    //                                   }),
+    //                               Expanded(
+    //                                   child:
+    //                                       Text('Set as Home Screen Wallpaper'))
+    //                             ],
+    //                           ),
+    //                           Row(
+    //                             children: [
+    //                               Checkbox(
+    //                                   value: setLockWallpaper,
+    //                                   activeColor: gradientColors[0].color,
+    //                                   onChanged: (value) {
+    //                                     stateSetter(() {
+    //                                       setLockWallpaper = value;
+    //                                     });
+    //                                   }),
+    //                               Expanded(
+    //                                   child:
+    //                                       Text('Set as Lock Screen Wallpaper'))
+    //                             ],
+    //                           ),
+    //                           SizedBox(
+    //                             height: 20,
+    //                           ),
+    //                           Row(
+    //                             mainAxisAlignment: MainAxisAlignment.center,
+    //                             crossAxisAlignment: CrossAxisAlignment.center,
+    //                             children: [
+    //                               !setHomeWallpaper && !setLockWallpaper
+    //                                   ? Container()
+    //                                   : FlatButton(
+    //                                       child: Text(
+    //                                         'Set',
+    //                                         style: TextStyle(
+    //                                             fontWeight: FontWeight.bold,
+    //                                             color: gradientColors[0].color,
+    //                                             fontSize: 20),
+    //                                       ),
+    //                                       onPressed: () async {
+    //                                         stateSetter(() {
+    //                                           settingWallpaper = true;
+    //                                         });
+    //                                         await _setWallpaper(
+    //                                             homeScreen: setHomeWallpaper,
+    //                                             lockScreen: setLockWallpaper,
+    //                                             save: saveImage);
+    //                                         stateSetter(() {
+    //                                           isSuccessfully = true;
+    //                                         });
+    //                                         Future.delayed(Duration(seconds: 2),
+    //                                             () {
+    //                                           stateSetter(() {
+    //                                             Navigator.pop(context);
+    //                                           });
+    //                                         });
+    //                                       },
+    //                                     ),
+    //                               FlatButton(
+    //                                 child: Text('Close'),
+    //                                 onPressed: () {
+    //                                   Navigator.pop(context);
+    //                                 },
+    //                               )
+    //                             ],
+    //                           )
+    //                         ],
+    //                       ),
+    //                     ),
+    //         );
+    //       }),
+    //     ));
+    // setState(() {
+    //   settingWallpaperDialogShowing = false;
+    // });
   }
 
   _setWallpaper(
       {bool save = true,
       bool homeScreen = true,
       bool lockScreen = true}) async {
-    //GRADIENT
-    Gradient gradient = _type == 0
-        ? LinearGradient(
-            colors: [...gradientColors.map((e) => e.color).toList()],
-            stops: [...gradientColors.map((e) => e.stop).toList()],
-            begin: begin,
-            end: end)
-        : RadialGradient(
-            colors: [...gradientColors.map((e) => e.color).toList()],
-            stops: [...gradientColors.map((e) => e.stop).toList()]);
+    // //GRADIENT
+    // Gradient gradient = _type == 0
+    //     ? LinearGradient(
+    //         colors: [...gradientColors.map((e) => e.color).toList()],
+    //         stops: [...gradientColors.map((e) => e.stop).toList()],
+    //         begin: begin,
+    //         end: end)
+    //     : RadialGradient(
+    //         colors: [...gradientColors.map((e) => e.color).toList()],
+    //         stops: [...gradientColors.map((e) => e.stop).toList()]);
 
-    // IMAGE SIZE
-    double imageWidth = 2160;
-    double imageHeight = 3840;
+    // // IMAGE SIZE
+    // double imageWidth = 2160;
+    // double imageHeight = 3840;
 
-    //DRAW WITH CANVAS
-    ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    Canvas canvas = Canvas(pictureRecorder);
-    Paint paint = Paint();
-    paint.shader = gradient.createShader(Rect.fromCenter(
-        center: Offset(imageWidth / 2, imageHeight / 2),
-        width: imageWidth,
-        height: imageHeight));
-    canvas.drawRect(
-        Rect.fromCenter(
-            center: Offset(imageWidth / 2, imageHeight / 2),
-            width: imageWidth,
-            height: imageHeight),
-        paint);
+    // //DRAW WITH CANVAS
+    // ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    // Canvas canvas = Canvas(pictureRecorder);
+    // Paint paint = Paint();
+    // paint.shader = gradient.createShader(Rect.fromCenter(
+    //     center: Offset(imageWidth / 2, imageHeight / 2),
+    //     width: imageWidth,
+    //     height: imageHeight));
+    // canvas.drawRect(
+    //     Rect.fromCenter(
+    //         center: Offset(imageWidth / 2, imageHeight / 2),
+    //         width: imageWidth,
+    //         height: imageHeight),
+    //     paint);
 
-    ui.Image image = await pictureRecorder
-        .endRecording()
-        .toImage(imageWidth.floor(), imageHeight.floor());
+    // ui.Image image = await pictureRecorder
+    //     .endRecording()
+    //     .toImage(imageWidth.floor(), imageHeight.floor());
 
-    //SAVE
-    String fileName =
-        (DateTime.now()).toIso8601String().replaceAll(".", "") + ".png";
-    // "${gradient.colors.map((e) => e.value).toList()}_${gradient.stops.map((e) => e.toStringAsFixed(2)).toList()}_${begin}_${end}.png";
-    var resultPath = await WallpaperService.save(
-        (await image.toByteData(format: ui.ImageByteFormat.png)),
-        fileName: fileName);
-    // SET WALLPAPER
-    int setWallpaperFor = homeScreen && lockScreen
-        ? WallpaperManager.BOTH_SCREENS
-        : homeScreen && !lockScreen
-            ? WallpaperManager.HOME_SCREEN
-            : WallpaperManager.LOCK_SCREEN;
-    await WallpaperManager.setWallpaperFromFile(resultPath, setWallpaperFor);
-    File tempFile = File(resultPath);
-    if (save) {
-      await __saveWallpaper(tempFile, fileName);
-    }
-    //delete temp file
-    await tempFile.delete(recursive: true);
+    // //SAVE
+    // String fileName =
+    //     (DateTime.now()).toIso8601String().replaceAll(".", "") + ".png";
+    // // "${gradient.colors.map((e) => e.value).toList()}_${gradient.stops.map((e) => e.toStringAsFixed(2)).toList()}_${begin}_${end}.png";
+    // var resultPath = await WallpaperService.save(
+    //     (await image.toByteData(format: ui.ImageByteFormat.png)),
+    //     fileName: fileName);
+    // // SET WALLPAPER
+    // int setWallpaperFor = homeScreen && lockScreen
+    //     ? WallpaperManager.BOTH_SCREENS
+    //     : homeScreen && !lockScreen
+    //         ? WallpaperManager.HOME_SCREEN
+    //         : WallpaperManager.LOCK_SCREEN;
+    // await WallpaperManager.setWallpaperFromFile(resultPath, setWallpaperFor);
+    // File tempFile = File(resultPath);
+    // if (save) {
+    //   await __saveWallpaper(tempFile, fileName);
+    // }
+    // //delete temp file
+    // await tempFile.delete(recursive: true);
   }
 
   __saveWallpaper(File file, String fileName) async {
@@ -1362,7 +1354,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return min;
   }
 
-  double genWidth(int index, {double maxWidth}) {
+  double genWidth(int index, {@required double maxWidth}) {
     double toSubtract = 0;
     for (int i = 0; i < index; i++) {
       toSubtract += gradientColors[i].stop * maxWidth;
@@ -1457,5 +1449,5 @@ class AnKiiGradientColor {
   double stop;
   Color color;
 
-  AnKiiGradientColor({this.stop, this.color});
+  AnKiiGradientColor({@required this.stop, @required this.color});
 }
